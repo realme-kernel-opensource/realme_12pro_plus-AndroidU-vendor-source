@@ -1,0 +1,17 @@
+/* add for audio bringup */
+&fsa4480 {
+	status = "disabled";
+};
+
+&qupv3_se2_i2c {
+ 	status = "ok";
+ 	fsa4480_new: fsa4480_new@42 {
+		status = "ok";
+ 		compatible = "qcom,fsa4480-i2c";
+ 		reg = <0x42>;
+ 	};
+};
+
+&sde_dp {
+	qcom,dp-aux-switch = <&fsa4480_new>;
+};

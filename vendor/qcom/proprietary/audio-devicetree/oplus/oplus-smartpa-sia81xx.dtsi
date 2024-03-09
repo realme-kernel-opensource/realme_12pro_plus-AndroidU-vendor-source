@@ -1,0 +1,103 @@
+/* Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&tlmm {
+	// 2023/07/21  added for audio bring up
+	sia81xx_gpio_L: sia81xx_gpio_L {
+		mux {
+			pins = "gpio96", "gpio96";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio96", "gpio96";
+			drive-strength = <6>;
+			bias-disable;
+		};
+	};
+
+	sia81xx_gpio_R: sia81xx_gpio_R {
+		mux {
+			pins = "gpio58", "gpio58";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio58", "gpio58";
+			drive-strength = <6>;
+			bias-disable;
+		};
+	};
+};
+
+&soc {
+	//#ifdef OPLUS_ARCH_EXTENDS
+	/* 2023/07/21, Add for sia81xx */
+	si_pa_L: si_pa_L{
+			compatible = "si,sia81xx";
+			si,si_pa_type = "sia81x9";  //compatible for sia8159 and sia8157
+			si,si_pa_reset = <&tlmm 96 0x00>;
+			si,si_pa_owi = <&tlmm 96 0x00>;
+			pinctrl-names = "si_pa_gpio";
+			pinctrl-0 = <&sia81xx_gpio_L>;
+
+			si,si_pa_disable_pin = <0>;
+
+			/* the same value share a same task
+			 * valid value range : 0 ~ 7 */
+			timer_task_hdl = <0>;
+
+			channel_num = <0>;
+			owi_mode = <1>;
+	};
+
+	si_pa_R: si_pa_R{
+			compatible = "si,sia81xx";
+			si,si_pa_type = "sia81x9";  //compatible for sia8159 and sia8157
+			si,si_pa_reset = <&tlmm 58 0x00>;
+			si,si_pa_owi = <&tlmm 58 0x00>;
+			pinctrl-names = "si_pa_gpio";
+			pinctrl-0 = <&sia81xx_gpio_R>;
+
+			si,si_pa_disable_pin = <0>;
+
+			/* the same value share a same task
+			 * valid value range : 0 ~ 7 */
+			timer_task_hdl = <0>;
+
+			channel_num = <1>;
+			owi_mode = <1>;
+	};
+	//#endif /* OPLUS_ARCH_EXTENDS */
+};
+
+&waipio_snd {
+	si,sia81xx-max-num = <2>;
+	si,sia81xx-aux-devs = <&si_pa_L>, <&si_pa_R>;
+	si,sia81xx-aux-devs-prefix = "SpkrMonoL", "SpkrMonoR";
+};
+
+&qupv3_se2_i2c {
+	// 2023/07/21  added for audio bring up
+	sipa_i2c_L: sipa_i2c_L@29 {
+		compatible = "si,sia81xx-i2c";
+		reg = <0x29>;
+		si,sipa-dev = <&si_pa_L>;
+	};
+
+	sipa_i2c_R: sipa_i2c_R@28 {
+		compatible = "si,sia81xx-i2c";
+		reg = <0x28>;
+		si,sipa-dev = <&si_pa_R>;
+	};
+};
+
